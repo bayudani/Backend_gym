@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Firefly\FilamentBlog\Models\Post;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +27,10 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function likedPosts()
+{
+    return $this->belongsToMany(Post::class, 'likes');
+}
     /**
      * The attributes that should be hidden for serialization.
      *

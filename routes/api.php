@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\blogController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ComentarController;
+use App\Http\Controllers\LikeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,3 +34,15 @@ Route::get('/coba/blabla', function () {
     return response()->json(['message' => 'route works']);
 });
 
+// Route public untuk lihat komentar
+Route::get('/posts/{postId}/comments', [ComentarController::class, 'index']);
+// like
+Route::get('/posts/{id}/likes', [LikeController::class, 'getLikes']);
+
+// comments
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/comments', [ComentarController::class, 'store']);
+    Route::delete('/comments/{id}', [ComentarController::class, 'destroy']);
+    Route::post('/posts/{id}/like', [LikeController::class, 'like']);
+    Route::delete('/posts/{id}/like', [LikeController::class, 'unlike']);
+});
