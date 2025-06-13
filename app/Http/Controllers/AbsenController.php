@@ -21,4 +21,7 @@ class AbsenController extends Controller
         return redirect()->route('filament.admin.resources.absens.index')
             ->with('success', 'Absen berhasil dilakukan!');
     }
+
+    // delete absen user
+
 }

@@ -14,17 +14,25 @@ class ListAbsens extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-        Action::make('scanQR')
-            ->label('Scan QR')
-            ->icon('heroicon-o-camera')
-            ->url(route('absens.scan.page')),
+            Action::make('scanQR')
+                ->label('Scan QR')
+                ->icon('heroicon-o-camera')
+                ->url(route('absens.scan.page')),
 
-        Action::make('inputManual')
-            ->label('Input Manual')
-            ->icon('heroicon-o-pencil')
-            ->url(static::getResource()::getUrl('create')) // redirect ke halaman /create
-            ->color('secondary'),
+            Action::make('inputManual')
+                ->label('Input Manual')
+                ->icon('heroicon-o-pencil')
+                ->url(static::getResource()::getUrl('create')) // redirect ke halaman /create
+
             // ->openUrlInNewTab(), // atau hapus kalau mau tetap di halaman yang sama
-    ];
+        ];
     }
+    // public function mount(): void
+    // {
+    //     parent::mount();
+
+    //     if (session('success')) {
+    //         $this->notify('success', session('success'));
+    //     }
+    // }
 }
