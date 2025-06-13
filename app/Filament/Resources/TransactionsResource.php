@@ -3,79 +3,102 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionsResource\Pages;
-use App\Filament\Resources\TransactionsResource\RelationManagers;
 use App\Models\transaction;
-use App\Models\Transactions;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 
 class TransactionsResource extends Resource
 {
     protected static ?string $model = transaction::class;
     protected static ?string $navigationGroup = 'Management';
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Select::make('member_profile_id')
-                    ->relationship('memberProfile', 'full_name')
-                    ->searchable()
-                    ->required(),
-                Select::make('membership_package_id')
-                    ->relationship('membershipPackage', 'name')
-                    ->required(),
-                FileUpload::make('transfer_proof')->image(),
-                Select::make('status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                    ])
-                    ->default('pending'),
-                DateTimePicker::make('confirmed_at')->label('Dikonfirmasi Pada'),
-            ]);
+        return $form->schema([
+            Select::make('userId')
+                ->label('Nama Anggota')
+                ->relationship('user', 'name')
+                ->searchable()
+                ->required(),
+
+            Select::make('membership_package_id')
+                ->label('Paket Keanggotaan')
+                ->relationship('membershipPackage', 'name')
+                ->searchable()
+                ->required(),
+
+            Forms\Components\TextInput::make('amount')
+                ->numeric()
+                ->required()
+                ->label('Jumlah'),
+
+            FileUpload::make('proof_image')
+                ->label('Bukti Transfer')
+                // defaults image value
+                
+                ->image()
+                ->directory('bukti-transfer'),
+
+            Select::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'Confirmed' => 'Confirmed',
+                ])
+                ->default('pending'),
+
+            DateTimePicker::make('confirmed_at')
+                ->label('Dikonfirmasi Pada'),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('memberProfile.full_name')->label('Nama Anggota'),
-                Tables\Columns\TextColumn::make('membershipPackage.name')->label('Paket Keanggotaan'),
-                Tables\Columns\TextColumn::make('amount')->label('Jumlah'),
-                Tables\Columns\TextColumn::make('status')->label('Status'),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Dibuat Pada'),
-                Tables\Columns\TextColumn::make('confirmed_at')->dateTime()->label('Dikonfirmasi Pada'),
+                TextColumn::make('user.name')
+                    ->label('Nama Anggota')
+                    ->searchable(),
+
+                TextColumn::make('membershipPackage.name')
+                    ->label('Paket Keanggotaan'),
+
+                TextColumn::make('amount')
+                    ->label('Jumlah')
+                    ->money('IDR', true),
+
+                TextColumn::make('status')
+                    ->label('Status'),
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat Pada')
+                    ->dateTime(),
+
+                TextColumn::make('confirmed_at')
+                    ->label('Dikonfirmasi Pada')
+                    ->since(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

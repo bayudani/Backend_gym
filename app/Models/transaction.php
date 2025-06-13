@@ -11,11 +11,12 @@ class transaction extends Model
     ];
 
     public function user()
-    {
-        return $this->belongsTo(user::class);
-    }
+{
+    return $this->belongsTo(User::class, 'userId');
+}
+
     public function membershipPackage()
-    {
-        return $this->belongsTo(membership::class, 'membership_id');
-    }
+{
+    return $this->belongsTo(membership::class, 'membership_package_id');
+}
 }
