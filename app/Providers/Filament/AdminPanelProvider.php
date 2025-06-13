@@ -29,6 +29,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            
+            ->brandName('FitID')
              ->plugins([
             Blog::make()
             ])

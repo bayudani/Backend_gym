@@ -14,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens,HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -28,9 +28,19 @@ class User extends Authenticatable
     ];
 
     public function likedPosts()
-{
-    return $this->belongsToMany(Post::class, 'likes');
-}
+    {
+        return $this->belongsToMany(Post::class, 'likes');
+    }
+    public function memberProfile()
+    {
+        return $this->hasOne(member::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(transaction::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
