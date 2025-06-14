@@ -50,4 +50,8 @@ class member extends Model
             }
         });
     }
+    public function rewards()
+    {
+        return $this->hasMany(reward::class, 'member_profile_id');
+    }
 }

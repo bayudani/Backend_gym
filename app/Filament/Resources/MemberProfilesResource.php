@@ -15,6 +15,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -36,6 +37,10 @@ class MemberProfilesResource extends Resource
                     ->required(),
                 TextInput::make('full_name')->required(),
                 TextInput::make('phone')->tel(),
+                TextInput::make('point')
+                ->label('Poin')
+                ->numeric(),
+                // ->readOnly(),
                 Textarea::make('addres'),
                 // TextInput::make('member_code')->required(),
                 DatePicker::make('start_date'),
@@ -55,6 +60,18 @@ class MemberProfilesResource extends Resource
                 Tables\Columns\TextColumn::make('start_date')->date()->label('Tanggal Mulai'),
                 Tables\Columns\TextColumn::make('end_date')->date()->label('Tanggal Berakhir'),
                 Tables\Columns\BooleanColumn::make('is_active')->label('Aktif?'),
+                Tables\Columns\TextColumn::make('point')
+                ->label('Poin')
+                ->sortable()
+                ->searchable(),
+                BadgeColumn::make('point')
+                ->label('Poin')
+                ->colors([
+                    'success' => fn ($state) => $state >= 1000,
+                    'warning' => fn ($state) => $state < 1000 && $state >= 500,
+                    'danger' => fn ($state) => $state < 500,
+                ])
+                ->formatStateUsing(fn ($state) => "{$state} poin"),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('is_active')
