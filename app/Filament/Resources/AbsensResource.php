@@ -17,8 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AbsensResource extends Resource
 {
     protected static ?string $model = absen::class;
+    protected static ?string $navigationGroup = 'Member area';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-qr-code';
 
     public static function form(Form $form): Form
     {
@@ -49,8 +50,33 @@ class AbsensResource extends Resource
                     ->label('Anggota'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('member_profile_id')
+                    ->label('Anggota')
+                    ->relationship('memberProfile', 'full_name')
+                    ->searchable(),
+
+                Tables\Filters\Filter::make('scan_time')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')
+                            ->label('Mulai Tanggal'),
+                        Forms\Components\DatePicker::make('until')
+                            ->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['from'], fn($q) => $q->whereDate('scan_time', '>=', $data['from']))
+                            ->when($data['until'], fn($q) => $q->whereDate('scan_time', '<=', $data['until']));
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (!$data['from'] && !$data['until']) return null;
+
+                        $from = $data['from'] ?? 'awal';
+                        $until = $data['until'] ?? 'sekarang';
+
+                        return "Scan antara $from - $until";
+                    }),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

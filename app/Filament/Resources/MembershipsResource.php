@@ -20,7 +20,7 @@ class MembershipsResource extends Resource
     protected static ?string $model = membership::class;
     protected static ?string $navigationGroup = 'Management';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-ticket';
 
     public static function form(Form $form): Form
     {

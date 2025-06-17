@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class RewardResource extends Resource
 {
     protected static ?string $model = Reward::class;
+    protected static ?string $navigationGroup = 'Member area';
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';
     protected static ?string $navigationLabel = 'Reward Member';
@@ -68,14 +69,35 @@ class RewardResource extends Resource
                     ])
                     ->sortable(),
             ])
-            ->filters([])
+            ->filters([
+                Tables\Filters\SelectFilter::make('reward_status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'claimed' => 'Claimed',
+                    ]),
+
+                // Tables\Filters\SelectFilter::make('member_profile_id')
+                //     ->label('Member')
+                //     ->relationship('memberProfile', 'full_name')
+                //     ->searchable(),
+
+                Tables\Filters\SelectFilter::make('reward_type')
+                    ->label('Jenis Reward')
+                    ->options(fn() => Reward::query()
+                        ->select('reward_type')
+                        ->distinct()
+                        ->pluck('reward_type', 'reward_type')
+                        ->toArray()),
+            ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('klaim')
                     ->label('Klaim Reward')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn ($record) => $record->reward_status === 'pending')
+                    ->visible(fn($record) => $record->reward_status === 'pending')
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         $member = $record->memberProfile;

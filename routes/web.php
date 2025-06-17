@@ -3,7 +3,10 @@
 use App\Http\Controllers\AbsenController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+// Route::view('/', 'welcome');
+Route::get('/', function () {
+        return redirect()->route('filament.admin.pages.dashboard');
+});
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
