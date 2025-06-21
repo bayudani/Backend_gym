@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'express' => [
+        'url' => env('EXPRESS_API_URL'),
+    ],
+
 ];
