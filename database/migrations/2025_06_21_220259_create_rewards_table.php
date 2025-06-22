@@ -10,12 +10,11 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        // migration: create_rewards_table.php
-        Schema::create('rewards', function (Blueprint $table) {
+    { 
+        Schema::create('rewardss', function (Blueprint $table) {
             $table->id();
             $table->foreignId('member_profile_id')->constrained('member_profiles')->onDelete('cascade');
-            $table->string('reward_type')->default('Suplemen');
+            $table->foreignId('item_reward_id')->constrained('item_rewards')->onDelete('cascade');
             $table->enum('reward_status', ['pending', 'claimed'])->default('pending');
             $table->timestamps();
         });

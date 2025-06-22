@@ -32,9 +32,12 @@ class RewardResource extends Resource
                 ->searchable()
                 ->required(),
 
-            Forms\Components\TextInput::make('reward_type')
-                ->label('Jenis Reward')
-                ->default('Suplemen')
+            Forms\Components\Select::make('itemReward.id')
+                ->label('Reward')
+                ->relationship('itemReward', 'name')
+                ->searchable()
+                ->preload()
+
                 ->required(),
 
             Forms\Components\Select::make('reward_status')
@@ -57,7 +60,7 @@ class RewardResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('reward_type')
+                Tables\Columns\TextColumn::make('itemReward.name')
                     ->label('Reward')
                     ->sortable(),
 
@@ -82,13 +85,13 @@ class RewardResource extends Resource
                 //     ->relationship('memberProfile', 'full_name')
                 //     ->searchable(),
 
-                Tables\Filters\SelectFilter::make('reward_type')
-                    ->label('Jenis Reward')
-                    ->options(fn() => Reward::query()
-                        ->select('reward_type')
-                        ->distinct()
-                        ->pluck('reward_type', 'reward_type')
-                        ->toArray()),
+                // Tables\Filters\SelectFilter::make('reward_type')
+                //     ->label('Jenis Reward')
+                //     ->options(fn() => Reward::query()
+                //         ->select('reward_type')
+                //         ->distinct()
+                //         ->pluck('reward_type', 'reward_type')
+                //         ->toArray()),
             ])
 
             ->actions([

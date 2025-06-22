@@ -24,20 +24,10 @@ class AbsenController extends Controller
 
         // Tambah poin ke member
         $member = member::find($validated['member_profile_id']);
-        $member->point += 20;
+        $member->point += 10;
 
         // Cek apakah point sudah mencapai 1000 atau lebih
-        if ($member->point >= 20) {
-            // Tambahkan reward
-            reward::create([
-                'member_profile_id' => $member->id,
-                'reward_type' => 'Suplemen Gratis',
-                'reward_status' => 'pending', // bisa klaim nanti
-            ]);
 
-            // Kurangi point sebanyak 1000
-            $member->point -= 0;
-        }
 
         $member->save();
 

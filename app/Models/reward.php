@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class reward extends Model
 {
-    protected $table = 'rewards';
+    protected $table = 'rewardss';
     protected $fillable = [
         'member_profile_id',
-        'reward_type',
+        'item_reward_id',
         'reward_status',
     ];
 
@@ -18,6 +18,10 @@ public function memberProfile()
 {
     return $this->belongsTo(member::class, 'member_profile_id');
 }
+    public function itemReward()
+    {
+        return $this->belongsTo(itemRewards::class, 'item_reward_id');
+    }
 
 
     

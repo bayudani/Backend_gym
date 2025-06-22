@@ -53,7 +53,7 @@ class MemberProfilesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Id_User'),
+                Tables\Columns\TextColumn::make('id')->label('Id member'),
                 Tables\Columns\TextColumn::make('user.name')->label('Nama Pengguna'),
                 Tables\Columns\TextColumn::make('full_name')->label('Nama Lengkap'),
                 Tables\Columns\TextColumn::make('phone')->label('Telepon'),
