@@ -20,6 +20,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Illuminate\Support\Facades\Http; // Ini client HTTP bawaan Laravel
 use Filament\Notifications\Notification; // Untuk notifikasi ke admin
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\ImageColumn;
 
 class TransactionsResource extends Resource
 {
@@ -50,7 +51,7 @@ class TransactionsResource extends Resource
             FileUpload::make('proof_image')
                 ->label('Bukti Transfer')
                 // defaults image value
-                
+
                 ->image()
                 ->directory('bukti-transfer'),
 
@@ -85,100 +86,111 @@ class TransactionsResource extends Resource
                     ->money('IDR', true),
 
                 TextColumn::make('status')
-                ->label('Status')
-                ->badge() // Ini bikin jadi badge
-                ->color(fn (string $state): string => match ($state) {
-                    'pending' => 'warning',
-                    'Confirmed' => 'success',
-                    'Rejected' => 'danger', // Kita tambahin status 'Rejected'
-                    default => 'gray',
-                }),
+                    ->label('Status')
+                    ->badge() // Ini bikin jadi badge
+                    ->color(fn(string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'Confirmed' => 'success',
+                        'Rejected' => 'danger', // Kita tambahin status 'Rejected'
+                        default => 'gray',
+                    }),
 
-                TextColumn::make('created_at')
-                    ->label('Dibuat Pada')
-                    ->dateTime(),
+                // TextColumn::make('created_at')
+                //     ->label('Dibuat Pada')
+                //     ->dateTime(),
 
-                TextColumn::make('confirmed_at')
-                    ->label('Dikonfirmasi Pada')
-                    ->since(),
+                ImageColumn::make('proof_image')
+                    ->label('Bukti Transfer')
+                    ->disk('public'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-            // EditAction::make(), // Kita ganti ini dengan yang lebih canggih
+                Action::make('lihat_bukti')
+                    ->label('Lihat Bukti')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->modalHeading('Bukti Transfer')
+                    ->modalButton('Tutup')
+                    ->visible(fn($record) => !empty($record->proof_image))
+                    ->modalContent(fn($record) => view('filament.pages.bukti-transfer', [
+                        'imageUrl' => asset('storage/' . $record->proof_image),
+                    ])),
+                // EditAction::make(), // Kita ganti ini dengan yang lebih canggih
 
-            // === INI BAGIAN PALING SERUNYA ===
+                // === INI BAGIAN PALING SERUNYA ===
 
-            Action::make('konfirmasi')
-                ->label('Konfirmasi')
-                ->icon('heroicon-o-check-circle')
-                ->color('success')
-                // Tombol ini hanya muncul jika statusnya 'pending'
-                ->visible(fn ($record) => $record->status === 'pending')
-                ->action(function ($record) {
-                    try {
-                        // Kirim sinyal (HTTP Request) ke Express
-                        $response = Http::patch(config('services.express.url') . '/transactions/' . $record->id . '/status', [
-                            'status' => 'Confirmed',
-                        ]);
+                Action::make('konfirmasi')
+                    ->label('Konfirmasi')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    // Tombol ini hanya muncul jika statusnya 'pending'
+                    ->visible(fn($record) => $record->status === 'pending')
+                    ->action(function ($record) {
+                        try {
+                            // Kirim sinyal (HTTP Request) ke Express
+                            $response = Http::patch(config('services.express.url') . '/transactions/' . $record->id . '/status', [
+                                'status' => 'Confirmed',
+                            ]);
 
-                        // Jika request gagal, lempar error
-                        $response->throw();
 
-                        // Update status di database Laravel juga biar UI langsung berubah
-                        $record->update(['status' => 'Confirmed', 'confirmed_at' => now()]);
-                        
-                        // Kasih notifikasi sukses ke admin
-                        Notification::make()
-                            ->title('Pembayaran Berhasil Dikonfirmasi!')
-                            ->body('Membership untuk ' . $record->user->name . ' sekarang aktif.')
-                            ->success()
-                            ->send();
-                            
-                    } catch (\Exception $e) {
-                        // Kalau gagal, kasih notifikasi error
-                        Notification::make()
-                            ->title('Gagal Mengkonfirmasi Pembayaran')
-                            ->body('Error: ' . $e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
+                            // Jika request gagal, lempar error
+                            $response->throw();
 
-            Action::make('tolak')
-                ->label('Tolak')
-                ->icon('heroicon-o-x-circle')
-                ->color('danger')
-                ->requiresConfirmation() // Biar admin ga salah pencet
-                ->visible(fn ($record) => $record->status === 'pending')
-                ->action(function ($record) {
-                     try {
-                        // Kirim request ke Express untuk menolak
-                        $response = Http::patch(config('services.express.url') . '/transactions/' . $record->id . '/status', [
-                            'status' => 'Rejected',
-                        ]);
-                        $response->throw();
+                            // Update status di database Laravel juga biar UI langsung berubah
+                            $record->update(['status' => 'Confirmed', 'confirmed_at' => now()]);
 
-                        // Update status di DB Laravel
-                        $record->update(['status' => 'Rejected']);
+                            // Kasih notifikasi sukses ke admin
+                            Notification::make()
+                                ->title('Pembayaran Berhasil Dikonfirmasi!')
+                                ->body('Membership untuk ' . $record->user->name . ' sekarang aktif.')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            // Kalau gagal, kasih notifikasi error
+                            Notification::make()
+                                ->title('Gagal Mengkonfirmasi Pembayaran')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
 
-                        Notification::make()
-                            ->title('Pembayaran Ditolak')
-                            ->info()
-                            ->send();
+                Action::make('tolak')
+                    ->label('Tolak')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation() // Biar admin ga salah pencet
+                    ->visible(fn($record) => $record->status === 'pending')
+                    ->action(function ($record) {
+                        try {
+                            // Kirim request ke Express untuk menolak
+                            $response = Http::patch(config('services.express.url') . '/transactions/' . $record->id . '/status', [
+                                'status' => 'Rejected',
+                            ]);
+                            $response->throw();
 
-                    } catch (\Exception $e) {
-                         Notification::make()
-                            ->title('Gagal Menolak Pembayaran')
-                            ->body('Error: ' . $e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
-                
-            // Tombol edit bawaan bisa tetap ada jika diperlukan
-            Tables\Actions\EditAction::make(),
+                            // Update status di DB Laravel
+                            $record->update(['status' => 'Rejected']);
+
+                            Notification::make()
+                                ->title('Pembayaran Ditolak')
+                                ->info()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Gagal Menolak Pembayaran')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+
+
+
+                // Tombol edit bawaan bisa tetap ada jika diperlukan
+                Tables\Actions\EditAction::make(),
             ]);
     }
 

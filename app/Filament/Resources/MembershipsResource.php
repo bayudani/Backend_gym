@@ -36,7 +36,13 @@ class MembershipsResource extends Resource
     {
         return $table
             ->columns([
-                //
+                
+                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('price')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('duration_months')
+                    ->label('Durasi (Hari)')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 //
