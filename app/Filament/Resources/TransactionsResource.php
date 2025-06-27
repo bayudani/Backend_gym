@@ -72,10 +72,10 @@ class TransactionsResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('Nama Anggota')
+                    ->label('Id')
                     ->searchable(),
                 TextColumn::make('user.name')
-                    ->label('Nama Anggota')
+                    ->label('Nama User')
                     ->searchable(),
 
                 TextColumn::make('membershipPackage.name')
