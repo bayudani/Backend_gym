@@ -28,7 +28,7 @@ class MembershipsResource extends Resource
             ->schema([
                 TextInput::make('name')->required(),
                 TextInput::make('price')->numeric()->required(),
-                TextInput::make('duration_months')->numeric()->required()->label('Durasi (Hari)'),
+                TextInput::make('duration_months')->numeric()->required()->label('Durasi (Bulan)'),
             ]);
     }
 
@@ -40,7 +40,7 @@ class MembershipsResource extends Resource
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('price')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('duration_months')
-                    ->label('Durasi (Hari)')
+                    ->label('Durasi (Bulan)')
                     ->sortable()
                     ->searchable(),
             ])

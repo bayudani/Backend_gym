@@ -22,7 +22,7 @@ class StatsOverview extends BaseWidget
         $absenToday = Absen::whereDate('scan_time', Carbon::today())->count();
 
         // Transaksi bulan ini
-        $transactionThisMonth = Transaction::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $transactionThisMonth = Transaction::count();
 
         // Member aktif
         $activeMembers = member::where('is_active', true)->count();
@@ -41,7 +41,7 @@ class StatsOverview extends BaseWidget
                 ->icon('heroicon-o-calendar')
                 ->color('success'),
 
-            Stat::make('Transaksi Bulan Ini', $transactionThisMonth)
+            Stat::make('Total Transaksi', $transactionThisMonth)
                 ->description('Total transaksi bulan ini')
                 ->icon('heroicon-o-credit-card')
                 ->color('warning'),

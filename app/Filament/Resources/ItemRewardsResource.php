@@ -35,7 +35,7 @@ class ItemRewardsResource extends Resource
                 Forms\Components\FileUpload::make('image')
                     ->label('Gambar Reward')
                     ->image()
-                    ->required()
+                    // ->required()
                     ->directory('item-rewards')
                     ->maxSize(1024) // 1MB
                     ->acceptedFileTypes(['image/*'])
