@@ -10,8 +10,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser; // <-- DITAMBAHKAN
+use Filament\Panel; // <-- DITAMBAHKAN
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser // <-- DITAMBAHKAN 'implements FilamentUser'
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
@@ -26,6 +28,19 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+    // 👇 METHOD BARU DITAMBAHKAN DI SINI 👇
+    /**
+     * Menentukan apakah user bisa mengakses Filament Panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Izinkan akses hanya jika emailnya adalah 'admin@gmail.com'
+        return $this->email === 'admin@gmail.com';
+
+        // --- ATAU CARA YANG LEBIH KEREN PAKE ROLE (karena kamu pake Spatie) ---
+        // return $this->hasRole('admin');
+    }
 
     public function likedPosts()
     {
