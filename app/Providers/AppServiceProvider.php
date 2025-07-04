@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         
-        if (config('app.env') === 'local') {
+        if (config('app.env') === 'production') {
             URL::forceScheme('https');
         };
         // 👇 TAMBAHKAN KODE INI DI SINI 👇
