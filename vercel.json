@@ -23,15 +23,5 @@
             "dest": "/public/index.php"
         }
     ],
-    "outputDirectory": "public",
-    "scripts": {
-        "build": [
-            "npm install",
-            "npm run build",
-            "php artisan config:cache",
-            "php artisan route:cache",
-            "php artisan view:cache",
-            "php artisan storage:link || true"
-        ]
-    }
+    "outputDirectory": "public"
 }
