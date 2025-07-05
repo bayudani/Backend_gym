@@ -5,6 +5,7 @@ use App\Http\Controllers\blogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ComentarController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\UploadController;
 use App\Models\member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{id}/like', [LikeController::class, 'like']);
     Route::delete('/posts/{id}/like', [LikeController::class, 'unlike']);
 });
+Route::post('/upload-proof', [UploadController::class, 'store']);
+
 
 Route::get('/member-nama/{id}', function ($id) {
     $member = member::find($id);

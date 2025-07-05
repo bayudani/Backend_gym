@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class RewardResource extends Resource
 {
@@ -96,32 +97,47 @@ class RewardResource extends Resource
 
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('klaim')
-                    ->label('Klaim Reward')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->visible(fn($record) => $record->reward_status === 'pending')
-                    ->requiresConfirmation()
-                    ->action(function ($record) {
+                // --- INI DIA TOMBOL AKSI BARUNYA ---
+            Tables\Actions\Action::make('confirm')
+                ->label('Konfirmasi')
+                ->icon('heroicon-o-check-circle')
+                ->color('success')
+                // Tampilkan tombol ini HANYA jika statusnya 'pending'
+                ->visible(fn (Reward $record): bool => $record->reward_status === 'pending')
+                // Minta konfirmasi pop-up sebelum menjalankan aksi
+                ->requiresConfirmation()
+                // Di sinilah logic utama terjadi
+                ->action(function (Reward $record) {
+                    // Gunakan transaksi database untuk keamanan
+                    DB::transaction(function () use ($record) {
                         $member = $record->memberProfile;
+                        $itemReward = $record->itemReward;
 
-                        if ($member->point >= 20) {
-                            $member->point -= 20;
-                            $member->save();
-
-                            $record->update(['reward_status' => 'claimed']);
-
+                        // 1. Validasi ulang: Cek apakah poin member masih cukup
+                        if ($member->point < $itemReward->points) {
                             Notification::make()
-                                ->title("Reward berhasil diklaim!")
-                                ->success()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title("Point tidak cukup!")
+                                ->title('Gagal! Poin Member Tidak Cukup')
+                                ->body("Poin member saat ini: {$member->point}. Poin dibutuhkan: {$itemReward->points}.")
                                 ->danger()
                                 ->send();
+                            // Hentikan proses
+                            return;
                         }
-                    }),
+
+                        // 2. Kurangi poin member
+                        $member->decrement('point', $itemReward->points);
+
+                        // 3. Ubah status reward menjadi 'claimed'
+                        $record->update(['reward_status' => 'claimed']);
+
+                        // 4. Beri notifikasi sukses
+                        Notification::make()
+                            ->title('Reward Berhasil Dikonfirmasi')
+                            ->success()
+                            ->send();
+                    });
+                }),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
