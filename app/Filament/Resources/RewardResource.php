@@ -46,6 +46,7 @@ class RewardResource extends Resource
                 ->options([
                     'pending' => 'Pending',
                     'claimed' => 'Claimed',
+                    'confirmed' => 'Confirmed',
                 ])
                 ->default('pending')
                 ->required(),
@@ -60,9 +61,25 @@ class RewardResource extends Resource
                     ->label('Nama Member')
                     ->searchable()
                     ->sortable(),
+                // point member
+
+                Tables\Columns\TextColumn::make('memberProfile.point')
+                    ->label('Poin Member')
+                    ->searchable()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('itemReward.name')
                     ->label('Reward')
+                    ->sortable(),
+                    // image
+
+                Tables\Columns\TextColumn::make('itemReward.points')
+                    ->label('Poin')
+                    ->sortable(),
+                // image
+
+                Tables\Columns\ImageColumn::make('itemReward.image')
+                    ->label('Image')
                     ->sortable(),
 
                 Tables\Columns\BadgeColumn::make('reward_status')
@@ -86,58 +103,55 @@ class RewardResource extends Resource
                 //     ->relationship('memberProfile', 'full_name')
                 //     ->searchable(),
 
-                // Tables\Filters\SelectFilter::make('reward_type')
-                //     ->label('Jenis Reward')
-                //     ->options(fn() => Reward::query()
-                //         ->select('reward_type')
-                //         ->distinct()
-                //         ->pluck('reward_type', 'reward_type')
-                //         ->toArray()),
+                Tables\Filters\SelectFilter::make('itemReward.name')
+                    ->label('Jenis Reward')
+                    ->options(fn() => Reward::query()
+                        ->select('itemReward.name')
+                        ->distinct()
+                        ->pluck('reward_type', 'reward_type')
+                        ->toArray()),
             ])
 
             ->actions([
                 Tables\Actions\EditAction::make(),
                 // --- INI DIA TOMBOL AKSI BARUNYA ---
-            Tables\Actions\Action::make('confirm')
-                ->label('Konfirmasi')
-                ->icon('heroicon-o-check-circle')
-                ->color('success')
-                // Tampilkan tombol ini HANYA jika statusnya 'pending'
-                ->visible(fn (Reward $record): bool => $record->reward_status === 'pending')
-                // Minta konfirmasi pop-up sebelum menjalankan aksi
-                ->requiresConfirmation()
-                // Di sinilah logic utama terjadi
-                ->action(function (Reward $record) {
-                    // Gunakan transaksi database untuk keamanan
-                    DB::transaction(function () use ($record) {
-                        $member = $record->memberProfile;
-                        $itemReward = $record->itemReward;
+                Tables\Actions\Action::make('confirm')
+                    ->label('Konfirmasi')
+                    ->icon('heroicon-o-check-circle')->color('info')
+                    ->visible(fn(Reward $record): bool => $record->reward_status === 'pending')
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi Reward')
+                    ->modalDescription('Anda yakin ingin konfirmasi.')
+                    ->action(function (Reward $record) {
+                        $record->update(['reward_status' => 'confirmed']);
+                        Notification::make()->title('Selesai!')->body('Reward telah ditandai sebagai dikonfirmasi, dan menunggu member untuk mengambil.')->success()->send();
+                    }),
 
-                        // 1. Validasi ulang: Cek apakah poin member masih cukup
-                        if ($member->point < $itemReward->points) {
-                            Notification::make()
-                                ->title('Gagal! Poin Member Tidak Cukup')
-                                ->body("Poin member saat ini: {$member->point}. Poin dibutuhkan: {$itemReward->points}.")
-                                ->danger()
-                                ->send();
-                            // Hentikan proses
-                            return;
-                        }
+                // --- AKSI 2 (BARU): DARI CONFIRMED -> CLAIMED (Finalisasi oleh Admin) ---
+                Tables\Actions\Action::make('markAsClaimed')
+                    ->label('Tandai Sudah Diambil & potong point')
+                    ->icon('heroicon-o-check-badge')->color('success')
+                    ->visible(fn(Reward $record): bool => $record->reward_status === 'confirmed')
+                    ->requiresConfirmation()
+                    ->modalHeading('Selesaikan Klaim Reward')
+                    ->modalDescription('Pastikan reward ini sudah benar-benar diserahkan ke member. dan point member akan langsung dipotong')
+                    ->action(function (Reward $record) {
+                        DB::transaction(function () use ($record) {
+                            $member = $record->memberProfile;
+                            $itemReward = $record->itemReward;
 
-                        // 2. Kurangi poin member
-                        $member->decrement('point', $itemReward->points);
+                            if ($member->point < $itemReward->points) {
+                                Notification::make()->title('Gagal! Poin Member Tidak Cukup')->danger()->send();
+                                return;
+                            }
 
-                        // 3. Ubah status reward menjadi 'claimed'
-                        $record->update(['reward_status' => 'claimed']);
+                            $member->decrement('point', $itemReward->points);
+                            $record->update(['reward_status' => 'claimed']); // Status jadi 'confirmed'
 
-                        // 4. Beri notifikasi sukses
-                        Notification::make()
-                            ->title('Reward Berhasil Dikonfirmasi')
-                            ->success()
-                            ->send();
-                    });
-                }),
-                
+                            Notification::make()->title('Reward Berhasil Diklaim!')->body('Poin member telah dikurangi sebesar ' . $itemReward->points . ' poin.!')->success()->send();
+                        });
+                    }),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -41,7 +41,8 @@ class AbsenController extends Controller
         $member->point += 10;
         $member->save();
 
-        return redirect()->route('filament.admin.resources.absens.index')
-            ->with('success', 'Absen berhasil & poin berhasil ditambahkan!');
+        return redirect()->back()
+            ->with('success', 'Absen berhasil disimpan. Selamat datang, ' . $member->full_name . '!');
+
     }
 }

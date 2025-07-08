@@ -3,8 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "build": "php artisan filament:assets && vite build && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
