@@ -71,10 +71,14 @@ class RewardResource extends Resource
                 Tables\Columns\TextColumn::make('itemReward.name')
                     ->label('Reward')
                     ->sortable(),
-                    // image
+                // image
 
                 Tables\Columns\TextColumn::make('itemReward.points')
                     ->label('Poin')
+                    ->sortable(),
+                    
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tanggal')
                     ->sortable(),
                 // image
 
@@ -101,11 +105,11 @@ class RewardResource extends Resource
                 // Tables\Filters\SelectFilter::make('member_profile_id')
                 //     ->label('Member')
                 //     ->searchable(),
-                
+
                 Tables\Filters\SelectFilter::make('itemReward.name')
-                ->label('Jenis Reward')
-                ->relationship('itemReward', 'name')
-                ->options(fn() => Reward::query()
+                    ->label('Jenis Reward')
+                    ->relationship('itemReward', 'name')
+                    ->options(fn() => Reward::query()
                         ->select('itemReward.name')
                         ->distinct()
                         // ->pluck('reward_type', 'reward_type')
@@ -121,7 +125,7 @@ class RewardResource extends Resource
                     ->visible(fn(Reward $record): bool => $record->reward_status === 'pending')
                     ->requiresConfirmation()
                     ->modalHeading('Konfirmasi Reward')
-                    ->modalDescription('Anda yakin ingin konfirmasi.')
+                    ->modalDescription('Anda yakin ingin konfirmasi?.')
                     ->action(function (Reward $record) {
                         $record->update(['reward_status' => 'confirmed']);
                         Notification::make()->title('Selesai!')->body('Reward telah ditandai sebagai dikonfirmasi, dan menunggu member untuk mengambil.')->success()->send();
@@ -150,6 +154,20 @@ class RewardResource extends Resource
 
                             Notification::make()->title('Reward Berhasil Diklaim!')->body('Poin member telah dikurangi sebesar ' . $itemReward->points . ' poin.!')->success()->send();
                         });
+                    }),
+
+                // rejected
+
+                Tables\Actions\Action::make('reject')
+                    ->label('Tolak')
+                    ->icon('heroicon-o-x-circle')->color('danger')
+                    ->visible(fn(Reward $record): bool => $record->reward_status === 'pending')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tolak Reward')
+                    ->modalDescription('Anda yakin ingin menolak reward ini?')
+                    ->action(function (Reward $record) {
+                        $record->update(['reward_status' => 'rejected']);
+                        Notification::make()->title('Reward Ditolak!')->body('Reward telah ditandai sebagai ditolak.')->danger()->send();
                     }),
 
             ])
