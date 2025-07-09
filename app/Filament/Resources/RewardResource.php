@@ -100,15 +100,15 @@ class RewardResource extends Resource
 
                 // Tables\Filters\SelectFilter::make('member_profile_id')
                 //     ->label('Member')
-                //     ->relationship('memberProfile', 'full_name')
                 //     ->searchable(),
-
+                
                 Tables\Filters\SelectFilter::make('itemReward.name')
-                    ->label('Jenis Reward')
-                    ->options(fn() => Reward::query()
+                ->label('Jenis Reward')
+                ->relationship('itemReward', 'name')
+                ->options(fn() => Reward::query()
                         ->select('itemReward.name')
                         ->distinct()
-                        ->pluck('reward_type', 'reward_type')
+                        // ->pluck('reward_type', 'reward_type')
                         ->toArray()),
             ])
 
