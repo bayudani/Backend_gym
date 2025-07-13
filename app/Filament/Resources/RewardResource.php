@@ -91,6 +91,8 @@ class RewardResource extends Resource
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'claimed',
+                        'info' => 'confirmed',
+                        'danger' => 'rejected',
                     ])
                     ->sortable(),
             ])
