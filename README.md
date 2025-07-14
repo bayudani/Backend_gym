@@ -1,7 +1,10 @@
-
 # Backend Gym
 
 Repository ini merupakan backend utama untuk aplikasi dashboard Gym, dibangun menggunakan [Filament](https://filamentphp.com/) pada Laravel. Backend ini berfungsi sebagai pusat manajemen data dan antarmuka admin.
+
+
+![1752488496535](image/README/1752488496535.png)
+
 
 ## Relasi antar Repository
 
@@ -25,7 +28,6 @@ Repository ini merupakan backend utama untuk aplikasi dashboard Gym, dibangun me
          v
 [Frontend_gym (Flutter)]
 ```
-
 
 ## Fitur Utama
 
