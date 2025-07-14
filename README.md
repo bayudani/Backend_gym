@@ -30,11 +30,12 @@ Repository ini merupakan backend utama untuk aplikasi dashboard Gym, dibangun me
 ## Fitur Utama
 
 - **Manajemen Member**Menambah, mengedit, menghapus, dan melihat data member gym secara efisien.
-- **Manajemen Pelatih**Kelola data pelatih, jadwal pelatihan, dan sesi latihan.
-- **Manajemen Jadwal**Penjadwalan kelas, sesi pribadi, serta integrasi kalender.
+- **Manajemen Artikel**Kelola data artikel.
+- **Manajemen Membership**kelola paket membership.
 - **Pembayaran & Transaksi**Pencatatan pembayaran member, tagihan, dan laporan keuangan sederhana.
-- **Article**
-  kelola data artikel seputar fitnes
+- **Item reward**
+  kelola data item reward
+- **Absensi member**
 
 ## Instalasi
 
